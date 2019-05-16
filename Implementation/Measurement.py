@@ -181,7 +181,9 @@ def generateRooms():
 def capturePhoto(timestamp):
     with PiCamera() as camera:
         camera.resolution = (1024, 768)
+        # Permit the Pi camera to warm up for a few seconds.
         sleep(2)
+        # Capture a photo with the current timestamp, flip it and save it in the photo folder.
         camera.capture(DEFAULT_PHOTO_PATH + timestamp + '.jpg')
         photo = Image.open(DEFAULT_PHOTO_PATH + timestamp + '.jpg')
         photo_corrected = photo.rotate(180)
@@ -203,7 +205,7 @@ def is_time_between(begin_time, end_time, check_time=None):
 
 
 if __name__ == '__main__':
-    # Constant resource, with the measurement entry point working during the working week only. 
+    # Constant resource, with the measurement entry point working during the working week only.
     while True:
         while is_time_between(time(9, 30), time(18, 30)) and datetime.today().weekday() < 5:
             main()
