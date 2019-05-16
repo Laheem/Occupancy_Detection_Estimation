@@ -9,8 +9,7 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.python import keras
 
-
-# Set the machine learning seeds to predetemined values to allow for reproducible results.
+# Set the machine learning seeds to predetermined values to allow for reproducible results.
 set_random_seed(2)
 seed(2)
 DATASET_PATH = None
@@ -42,6 +41,7 @@ def plot_history(history):
     plt.legend()
     plt.show()
 
+
 # Normalises the results to increase the accuracy of prediction from the model.
 def norm(x):
     return (x - train_stats['mean']) / train_stats['std']
@@ -53,24 +53,25 @@ def build_model():
         keras.layers.Dense(64, activation=tf.nn.relu, input_shape=[len(train_dataset.keys())]),
         keras.layers.Dense(64, activation=tf.nn.relu),
         keras.layers.Dense(1),
-  ])
+    ])
     # Fixes a bug relating to weird MSE results.
     keras.backend.set_epsilon(1)
-    model.compile(loss='mse', optimizer='adam', metrics=['acc','cosine'])
+    model.compile(loss='mse', optimizer='adam', metrics=['acc', 'cosine'])
 
     return model
+
 
 # Pulls a CSV file from the target path and parses it given the names below.
 resultsPath = DATASET_PATH
 
-col_names = ["numberOfOccupants","isRoomOccupied","co2Level"]
+col_names = ["numberOfOccupants", "isRoomOccupied", "co2Level"]
 raw_dataset = pd.read_csv(resultsPath, names=col_names, na_values="?", comment='\t',
-                      sep=";", skipinitialspace=True)
+                          sep=";", skipinitialspace=True)
 
 # Copy the dataset into a training set, and get 80% of it for training purposes.
 dataset = raw_dataset.copy()
 
-train_dataset = dataset.sample(frac=0.8,random_state=0)
+train_dataset = dataset.sample(frac=0.8, random_state=0)
 test_dataset = dataset.drop(train_dataset.index)
 
 # Remove the number of occupants from the testing and training dataset for future purposes.
@@ -92,20 +93,19 @@ example_result = model.predict(example_batch)
 
 # Prints a dot on every epoch trained.
 class PrintDot(keras.callbacks.Callback):
-  def on_epoch_end(self, epoch, logs):
-    if epoch % 100 == 0: print('')
-    print('.', end='')
+    def on_epoch_end(self, epoch, logs):
+        if epoch % 100 == 0: print('')
+        print('.', end='')
+
 
 # Attempt to use the model to predict the remaining 20% of data over a specified number of epochs.
 history = model.fit(train_dataset, train_labels, epochs=EPOCHS,
-                    validation_split = 0.2, verbose=0, callbacks=[PrintDot()])
+                    validation_split=0.2, verbose=0, callbacks=[PrintDot()])
 # Give up after a while if no noticeable improvements to the model can be made, to avoid overfitting.
 keras.callbacks.EarlyStopping(monitor='val_loss', patience=0, verbose=0, mode='auto')
 
-# Get a result based on the results of the model against the validation set. 
+# Get a result based on the results of the model against the validation set.
 scores = model.evaluate(test_dataset, test_labels, verbose=1)
 
 print("\nNUMBER OF EPOCHS: " + str(EPOCHS))
-print("Accuracy: %.2f%%" % (scores[1]*100))
-
-
+print("Accuracy: %.2f%%" % (scores[1] * 100))
